@@ -2,7 +2,6 @@ package invertedindex
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -92,8 +91,16 @@ func (idx *InvertedIndex) SearchInMemory(keywords []string) ([]Result, error) {
 // searchInMemoryTopK searches the preloaded index and returns the top K results after
 // sorting the document frequencies.
 func (idx *InvertedIndex) SearchInMemoryTopK(keywords []string, k int) ([]Result, error) {
-	// TODO: Implement me
-	return nil, errors.New("SearchInMemoryTopK not implemented")
+	if err := idx.ensureIndexIsLoaded(); err != nil {
+		return nil, err
+	}
+	docMatches := collectDocMatches(idx.data, keywords)
+	docMatchesSlices := convertSetMapToSliceMap(docMatches)
+	sortedResults := toSortedResults(docMatchesSlices)
+	if k > len(sortedResults) {
+		k = len(sortedResults)
+	}
+	return sortedResults[:k], nil
 }
 
 func (idx *InvertedIndex) ensureIndexIsLoaded() error {
