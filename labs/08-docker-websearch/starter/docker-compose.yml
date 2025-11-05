@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  webserver:
+    image: websearch_webserver
+    container_name: webserver
+    ports:
+      - "8888:8080"
+    command: -addr :8080 -htmlPath /index.html -shards indexserver:9090
+    networks:
+      - webnet
+  
+  indexserver:
+    image: websearch_indexserver
+    container_name: indexserver
+    volumes:
+      - ./index:/index
+    command: --rpc_addr=:9090 --index_files=/index/invertedindex-medium.txt
+    networks:
+      - webnet
+
+networks:
+  webnet:
+    driver: bridge
